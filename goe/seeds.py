@@ -134,8 +134,12 @@ def lattice(shape: Shape, level: int = 3, pitch: int = 96, jitter: int = 0, seed
     return g
 
 
+from .seedcode import seed_from_code  # noqa: E402  (registry lives below)
+
 SEEDS: dict[str, Callable[..., np.ndarray]] = {
     "single": single,
+    # Any patch at all, addressed by number -- see goe/seedcode.py.
+    "code": seed_from_code,
     "cross": cross,
     "ring": ring,
     "r-pentomino": r_pentomino,

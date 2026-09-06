@@ -208,6 +208,23 @@ def main(argv: list[str] | None = None) -> int:
                          help="skip the NumPy backend above this grid side")
     p_bench.set_defaults(func=cmd_bench)
 
+    p_seeds = sub.add_parser(
+        "seeds", help="survey the numbered seed-code space exhaustively")
+    p_seeds.add_argument("--rule", default="classic", choices=sorted(PRESETS))
+    p_seeds.add_argument("--size", type=int, default=3, help="patch side, in cells")
+    p_seeds.add_argument("--full", action="store_true",
+                         help="let cells take every level 0..grow, not just dead/alive")
+    p_seeds.add_argument("--cells", type=int, default=220, help="grid side to grow on")
+    p_seeds.add_argument("--max-codes", type=int, default=None,
+                         help="stop after this many raw codes (the space is huge when --full)")
+    p_seeds.add_argument("--top", type=int, default=20, help="how many blooms to list")
+    p_seeds.add_argument("--palette", default="phosphor", choices=sorted(PALETTES))
+    p_seeds.add_argument("--blooms-only", action="store_true")
+    p_seeds.add_argument("--backend", default="auto", choices=["auto", "cuda", "cpu"])
+    p_seeds.add_argument("-o", "--out", default=None, help="write a contact sheet here")
+    from .atlas import cmd_seeds
+    p_seeds.set_defaults(func=cmd_seeds)
+
     p_list = sub.add_parser("list", help="show the available rules, seeds and palettes")
     p_list.set_defaults(func=cmd_list)
 

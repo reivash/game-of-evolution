@@ -86,6 +86,74 @@ texture; it is individual cells.
 
 ---
 
+## Numbering the seeds
+
+Wolfram's rule number is a 1-D rule's truth table read as a base-2 numeral.
+The same trick numbers *seeds* here. Fix a `size × size` patch and an alphabet
+of the levels a cell may take, and a seed is a base-`B` numeral whose digits
+are the patch read top-left to bottom-right — so written out in base `B`, **the
+code is a picture of the seed**:
+
+```python
+>>> decode(625, size=3, alphabet=(0, 1, 2, 3, 4))   # 625 == 1 * 5**4
+array([[0, 0, 0],
+       [0, 1, 0],          # 625 in base 5 is 000010000
+       [0, 0, 0]], dtype=int8)
+```
+
+`code 0` is the empty patch — nothing. With the binary alphabet `(0, 3)` on a
+3×3 patch there are `2⁹ = 512` codes; with every level in play, `4⁹ = 262,144`.
+
+### Most of those codes are the same organism
+
+The rule is isotropic and the grid is homogeneous, so a seed that differs only
+by *where it sits*, or by a rotation or a flip, grows the identical bloom. A
+single cell in the top-left of the patch and a single cell in the middle are
+the same seed. `canonical_key` folds each orbit — 8 dihedral symmetries × every
+translation — to one representative, and the redundancy is enormous:
+
+| patch | alphabet | raw codes | distinct organisms |
+|---|---|---|---|
+| 3×3 | `(0, 3)` | 512 | **86** |
+| 3×3 | `(0,1,2,3)` | 262,144 | 1,021 in the first 3,000 codes |
+
+86 is small enough to simply run all of them:
+
+```bash
+python -m goe seeds --rule classic --size 3 -o screenshots/seed-atlas.png
+```
+
+```
+86 distinct up to symmetry and translation: 37 bloom, 16 static, 32 extinct, 1 empty
+```
+
+<p align="center">
+  <img src="screenshots/seed-atlas.png" width="900" alt="Every 3x3 seed code that blooms">
+</p>
+
+All 37 that bloom, labelled by code, each with a thumbnail of its own seed in
+the corner. They are not as different as you might hope, and that is the
+finding: **the seed fixes the symmetry class and the interior detail, but not
+the asymptotic shape.** Code 1 (one cell) keeps full eight-fold symmetry
+forever; code 108 has a single mirror axis; code 15 is four-fold. All of them
+converge on the same expanding disc, because the growth front's speed is a
+property of the rule, not of what started it.
+
+The other 49 are worth knowing about too: 32 die outright and 16 freeze into
+still lifes. A seed *dying* is the common case, for the growth-band reason
+above — pack cells together and they overcrowd each other on the first step.
+
+Any code can be used directly as a seed:
+
+```bash
+python -m goe render --seed code --seed-arg code=108 --seed-arg size=3 -o s108.png
+```
+
+Add `--full` to the survey to enumerate seeds where cells take intermediate
+levels rather than just dead-or-alive, and `--max-codes` to bound the walk.
+
+---
+
 ## Finding the rules
 
 `classic` is the reference, but the threshold family has room in it, so I swept
@@ -179,6 +247,7 @@ runs on NumPy; `--backend` picks explicitly, and `auto` prefers CUDA.
 ```bash
 python -m goe list                 # rules, seeds, palettes
 python -m goe gallery -o screenshots
+python -m goe seeds -o atlas.png   # exhaustive seed-code survey
 python -m goe bench
 ```
 
@@ -241,6 +310,8 @@ goe/
   seeds.py          seed patterns
   palettes.py       colour ramps
   render.py         echo, bloom, magnification
+  seedcode.py       numbering every seed, and folding symmetry orbits
+  atlas.py          exhaustive survey of the seed-code space
   gallery.py        the curated screenshot set
   cli.py            python -m goe
 ```
