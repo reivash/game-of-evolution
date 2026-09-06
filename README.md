@@ -86,6 +86,46 @@ texture; it is individual cells.
 
 ---
 
+## Watch it grow
+
+The stills above are end states. **[`viewer/index.html`](viewer/index.html)** is
+the same automaton running live in the browser — open the file directly, no
+build step, no server, no dependencies. It reimplements the rule in JavaScript
+with the same row-triple decomposition the CUDA kernel uses, and it is verified
+against the Python: identical live-cell counts at every generation checked.
+
+<p align="center">
+  <img src="screenshots/viewer-circle.png" width="820" alt="The Bloom Chamber viewer running a circle seed at generation 310">
+</p>
+
+Pick a seed shape, set the dot spacing, press play. Eight shapes, all six rules,
+speed up to ten generations a frame, and a readout of generation, live cells,
+coverage and state.
+
+A run is linkable — the query string sets everything, and `gens` runs a fixed
+number of generations and stops, which is how both stills on this page were
+captured:
+
+```
+viewer/index.html?shape=square&spacing=26&rule=classic&world=400&gens=290
+```
+
+Two things worth trying. **Drop the spacing below about ten** and the seeds kill
+each other outright — the readout flips to *Extinct* within a few generations,
+which is the overcrowding constraint made visible. And **tick "Wrap edges" with
+the `single` seed on a 64 or 108 world**:
+
+<p align="center">
+  <img src="screenshots/viewer-frozen.png" width="820" alt="One cell on a 64x64 torus, frozen into a wallpaper at generation 236">
+</p>
+
+One cell grows into itself, and at generation 236 it stops changing — for good.
+The viewer detects that exactly (a generation in which no cell changes is a
+fixed point) and reports *Frozen at 236*. Larger worlds cycle rather than
+freeze: a 300-wide torus settles into a twelve-state loop instead.
+
+---
+
 ## Numbering the seeds
 
 Wolfram's rule number is a 1-D rule's truth table read as a base-2 numeral.
@@ -251,6 +291,9 @@ python -m goe seeds -o atlas.png   # exhaustive seed-code survey
 python -m goe bench
 ```
 
+Or just open [`viewer/index.html`](viewer/index.html) in a browser — the live
+version needs nothing installed at all.
+
 ```bash
 python -m goe render --rule deep --seed mandala --seed-arg size=28 --seed-arg seed=5 --palette ember --size 720x720 --scale 2 -g 700 -o bloom.png
 ```
@@ -314,4 +357,6 @@ goe/
   atlas.py          exhaustive survey of the seed-code space
   gallery.py        the curated screenshot set
   cli.py            python -m goe
+viewer/
+  index.html        the live browser viewer, dependency-free
 ```
