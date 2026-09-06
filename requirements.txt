@@ -1,0 +1,6 @@
+numpy>=1.24
+pillow>=10.0
+
+# Optional: the CUDA backend. Needs an NVIDIA driver, but no CUDA Toolkit --
+# CuPy compiles the kernel at runtime with the NVRTC it bundles.
+#   pip install "cupy-cuda12x[ctk]"
